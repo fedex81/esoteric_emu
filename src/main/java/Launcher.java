@@ -20,9 +20,6 @@ public class Launcher {
     static final long clocksPerFrame = sh4_clock_speed/60; //assuming 60fps
     static final int burstCycles = Sh4Context.burstCycles;
 
-    /**
-     * Auto-generated main method to display this JFrame
-     */
     public static void main(String[] args) {
         System.setProperty("org.lwjgl.librarypath", Paths.get(".", "lib").toAbsolutePath().toString());
         Memory.setUpMemoryZones();
@@ -31,6 +28,7 @@ public class Launcher {
 
 //		Loader.loadBinaryFile("res/ip.bin",false,Memory.mem, Memory.getMemoryAddress(IP_BIN_START_ADDRESS));
         Loader.loadBinaryFile("res/gg_3dEngine.bin", false, Memory.mem, Memory.getMemoryAddress(PRG_START_ADDRESS));
+//        Loader.loadBinaryFile("res/gg_objectorium.bin", false, Memory.mem, Memory.getMemoryAddress(PRG_START_ADDRESS));
         run();
     }
 

@@ -166,70 +166,6 @@ public final class Sh4Context {
 	public void setDisassembler(Sh4Disassembler s){
 		disassembler = s;
 	}
-
-	/**
-	 *         sb.append(String.format("D0: %08x   D4: %08x   A0: %08x   A4: %08x     PC:  %08x\n",
-	 *                 cpu.getDataRegisterLong(0), cpu.getDataRegisterLong(4), cpu.getAddrRegisterLong(0),
-	 *                 cpu.getAddrRegisterLong(4), wrapPc));
-	 * @param opcode
-	 */
-	public void showDebugging(int opcode){
-		StringBuilder sb = new StringBuilder("\n");
-		sb.append(disassembler.disassemble(PC, opcode)).append("\n");
-		sb.append(String.format("PC : %08x\t", PC));
-		sb.append(String.format("SPC: %08x\t", SPC));
-		sb.append(String.format("SR : %08x\t", SR));
-
-		sb.append( ((SR & flagT)!=0 ? "T" : "-") + ((SR & flagS)!=0 ? "S" : "-") +
-				((SR & flagQ)!=0 ? "Q" : "-") + (((SR & flagBL)!=0 ? "BL" : "-")) );
-		sb.append("\n");
-		for(int i =0; i < 16; i++){
-			sb.append(String.format("R%02d: %08x\t", i, registers[i]));
-			if(i == 7){
-				sb.append("\n");
-			}
-		}
-		sb.append("\n\n");
-
-		sb.append(String.format("FPUL: %08x\t", FPUL));
-		sb.append(String.format("FSCR: %08x\t", FPSCR));
-		sb.append(String.format("PR  : %08x\t", PR));
-		sb.append("\n");
-
-		for(int i =0; i < 16; i++){
-			sb.append(String.format("FR%02d: %08f\t", i, FRm[i]));
-			if(i == 7){
-				sb.append("\n");
-			}
-		}
-//		Logger.log(Logger.CPU,sb.toString());
-		System.out.println(sb);
-	}
-
-	public void showDebuggingOld(int opcode){
-		Logger.log(Logger.CPU,disassembler.disassemble(PC, opcode));
-		for(int i =0; i < 16; i++){
-			Logger.log(Logger.CPU,"R" + i + " --> " + Integer.toHexString(registers[i]));
-		}
-		Logger.log(Logger.CPU,"PC " + Integer.toHexString(PC));
-		Logger.log(Logger.CPU,"SPC " + Integer.toHexString(SPC));
-		Logger.log(Logger.CPU,"SR " + Integer.toHexString(SR));
-
-		Logger.log(Logger.CPU,"T: " + ((SR & flagT)!=0 ? 1 : 0));
-		Logger.log(Logger.CPU,"S: " +  ((SR & flagS)!=0 ? 1 : 0));
-		Logger.log(Logger.CPU,"Q: " +  ((SR & flagQ)!=0 ? 1 : 0));
-		Logger.log(Logger.CPU,"BL: " +  ((SR & flagBL)!=0 ? 1 : 0));
-		
-		Logger.log(Logger.CPU,"FPUL:" + Integer.toHexString(FPUL));
-		
-		Logger.log(Logger.CPU,"FPSCR:" + Integer.toHexString(FPSCR));
-		
-		Logger.log(Logger.CPU, "PR:"  + Integer.toHexString(PR));
-		
-		for(int i =0; i < 16; i++){
-			Logger.log(Logger.CPU,"FR" + i + " --> " + FRm[i]);
-		}
-	}
 	
 	/* views over the float registers 
 	 * 
@@ -3550,7 +3486,7 @@ public final class Sh4Context {
 	private final void decode(int instruction)
 	{	
 		if(debugging)
-			showDebugging(instruction);
+			Sh4Helper.printState(this, instruction);
 		
 	    switch ((instruction >>> 12) & 0xf) 
 		{
