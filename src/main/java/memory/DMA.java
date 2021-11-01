@@ -70,7 +70,7 @@ public final class DMA {
 				//System.out.println("Is it the last " +  last);
 				port = ((TransferControlWord >> 16) & 0x3);
 				//System.out.println("PORT "  + port);
-				if (port > Emu.connectedDevices-1) // makes sense no? ^_^
+				if (port > Emu.getConnectedDevices()-1) // makes sense no? ^_^
 				{
 					// if a device in a given port 0xFFFFFFFF is written to it :)
 					Memory.memViewDWORD.put(OutputBufferAddress >>> 2,0xFFFFFFFF);
@@ -93,24 +93,24 @@ public final class DMA {
 							((28 << 24) & 0xFF000000);
 							
 							Memory.memViewDWORD.put(OutputBufferAddress >>> 2,ComandWord);
-							Emu.ports[port].writeDeviceInfo(OutputBufferAddress+4);
+							Emu.getPorts()[port].writeDeviceInfo(OutputBufferAddress+4);
 							break;
 							// condition info
 						case 9:
 							ComandWord = 0x08 | // data transfer (ComandWord)
 							((sendAddress << 8) & 0xFF00) |
 							((((receiveAddress == 0x20) ? 0x20 : 1) << 16) & 0xFF0000) |
-							(((Emu.ports[port].getConditionInfoSize()/4 + 1) << 24) & 0xFF000000);
+							(((Emu.getPorts()[port].getConditionInfoSize()/4 + 1) << 24) & 0xFF000000);
 							//System.out.println("Packet " + Integer.toHexString(ComandWord));
 							//System.out.println("OutputBufferAddress " + Integer.toHexString(OutputBufferAddress));
 							Memory.memViewDWORD.put(OutputBufferAddress >>>2,ComandWord);
 							Memory.memViewDWORD.put((OutputBufferAddress +4) >>> 2, Maple.MAPLE_CONTROLLER);
 							//System.out.println("Writing condition info at " + Integer.toHexString(OutputBufferAddress+8));
-							Emu.ports[port].getConditionInfo(OutputBufferAddress+8);
+							Emu.getPorts()[port].getConditionInfo(OutputBufferAddress+8);
 						break;
 						};
 					}
-					Emu.interruptController.addInterrupts(Intc.ASIC_EVT_MAPLE_DMA);	
+					Emu.getInterruptController().addInterrupts(Intc.ASIC_EVT_MAPLE_DMA);
 				}	
 				currentAddr += numberOfFrames * 4 + 8;
 			}

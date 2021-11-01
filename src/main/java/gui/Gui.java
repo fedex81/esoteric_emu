@@ -92,7 +92,7 @@ public class Gui extends javax.swing.JFrame {
 //				inst.setVisible(true);
 //			}
 //		});
-		Emu test = new Emu();
+		Emu test = new Emu(Memory.INSTANCE);
 		Sh4Context.debugging = true;
 		long totCycles;
 		while(true) {

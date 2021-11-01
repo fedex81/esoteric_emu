@@ -27,8 +27,6 @@ public class Sh4Disassembler {
 	private static final int  BANK(int opcode){
 		return ((opcode&0x0070)>>4);
 	}
-
-	StringBuffer n = new StringBuffer();
 	
 	/* all instructions are 16-bit */
 

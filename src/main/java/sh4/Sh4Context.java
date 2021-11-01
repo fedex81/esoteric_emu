@@ -6,11 +6,12 @@ import gui.Emu;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import memory.IMemory;
+import memory.IMemory;
 import powervr.TileAccelarator;
 
 import utils.Logger;
 
-import memory.Memory;
 
 /*
  *  Revision 1 -  port the code from Dcemu and use information provided by dark||raziel (done)
@@ -38,9 +39,9 @@ import memory.Memory;
  *  simultaneous execution of instructions,etc..
  */
 
-public final class Sh4Context {
+public class Sh4Context {
 
-	public static final int burstCycles = 448; // this value was given to me by drk||Raziel
+	public static int burstCycles = 448; // this value was given to me by drk||Raziel
 
 	public static final int RN(int x){
 		return ((x >> 8) & 0xf);
@@ -141,20 +142,21 @@ public final class Sh4Context {
 	public static final int flagFR = 0x00200000;
 	
 	public Sh4Disassembler disassembler;
+	protected IMemory memory;
 
 	public static boolean debugging=false;
 	
-	public Sh4Context(){
+	public Sh4Context(IMemory memory){
 		// GPR registers
 		registers = new int[24];
 		// setting up the  floating point banks
 		FRm = new float[32];
-					
+		this.memory = memory;
 		// setting system registers to their initial values
 		reset();
 	}
 	
-	public final void reset(){
+	public void reset(){
 		VBR =0;
 		FPSCR = 0x00040001;
 		PC =0x8C000000 + 0x00008000;
@@ -209,7 +211,7 @@ public final class Sh4Context {
 		int d = (code & 0xff);
 		int n = ((code >> 8) & 0x0f);
 	
-		registers[n] = Memory.read16(PC + 4 + (d << 1));
+		registers[n] = memory.read16i(PC + 4 + (d << 1));
 		
 		if ((registers[n]&0x8000)==0) registers[n] &= 0x0000FFFF;
 		else registers[n] |= 0xFFFF0000;
@@ -224,7 +226,7 @@ public final class Sh4Context {
 		int d = (code & 0xff);
 		int n = ((code >> 8) & 0x0f);
 
-		registers[n] = Memory.read32((PC & 0xfffffffc) + 4 + (d << 2));
+		registers[n] = memory.read32i((PC & 0xfffffffc) + 4 + (d << 2));
 
 		cycles--; PC+=2;
 		
@@ -245,7 +247,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write8(registers[n],(byte) registers[m]);
+		memory.write8i(registers[n],(byte) registers[m]);
 		
 		cycles--; PC+=2;
 	}
@@ -255,7 +257,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write16(registers[n], registers[m]) ;
+		memory.write16i(registers[n], registers[m]) ;
 
 		cycles--; PC+=2;
 	}
@@ -267,7 +269,7 @@ public final class Sh4Context {
 
 	//	System.out.println("MOVLS source " + Integer.toHexString(registers[n]) + "destination " + Integer.toHexString(registers[m]));
 		
-		Memory.write32(registers[n], registers[m]);
+		memory.write32i(registers[n], registers[m]);
 
 		cycles--; PC+=2;
 	}
@@ -278,7 +280,7 @@ public final class Sh4Context {
 		int n = RN(code);
 		byte c;
 
-		c =(byte)( Memory.read8(registers[m]) & 0xFF);
+		c =(byte)( memory.read8i(registers[m]) & 0xFF);
 						
 		registers[n] = (int)c;
 		
@@ -294,7 +296,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 		
-		short w =(short) (Memory.read16(registers[m]) & 0xFFFF);
+		short w =(short) (memory.read16i(registers[m]) & 0xFFFF);
 
 		registers[n] = (int)w;
 
@@ -306,7 +308,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		registers[n] = Memory.read32(registers[m]);
+		registers[n] = memory.read32i(registers[m]);
 
 		
 		cycles--; PC+=2;
@@ -318,7 +320,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 1;
-		Memory.write8(registers[n],(byte) registers[m]);
+		memory.write8i(registers[n],(byte) registers[m]);
 		
 		cycles--; PC+=2;
 	}
@@ -330,7 +332,7 @@ public final class Sh4Context {
 
 		registers[n] -= 2;
 
-		Memory.write16(registers[n], registers[m]);
+		memory.write16i(registers[n], registers[m]);
 		
 		cycles--; PC+=2;
 		
@@ -343,7 +345,7 @@ public final class Sh4Context {
 
 		registers[n] -= 4;
 		
-		Memory.write32(registers[n], registers[m]);
+		memory.write32i(registers[n], registers[m]);
 
 		cycles--; PC+=2;
 		
@@ -354,7 +356,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		byte b = (byte)(Memory.read8(registers[m]) & 0xFF);
+		byte b = (byte)(memory.read8i(registers[m]) & 0xFF);
 		registers[n] = (int)b;
 		if(n != m) registers[m] += 1;
 
@@ -367,7 +369,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		short w =(short) Memory.read16(registers[m]);
+		short w =(short) memory.read16i(registers[m]);
 		registers[n] = (int) w;
 		if(n != m) registers[m] += 2;
 
@@ -380,7 +382,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		registers[n] = Memory.read32(registers[m]);
+		registers[n] = memory.read32i(registers[m]);
 		if(n != m) registers[m] += 4;
 
 		cycles--; PC+=2;
@@ -392,7 +394,7 @@ public final class Sh4Context {
 		int d = ((code >> 0) & 0x0f);
 		int n = RM(code);
 
-		Memory.write8(registers[n] + (d << 0),(byte) registers[0]);
+		memory.write8i(registers[n] + (d << 0),(byte) registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -403,7 +405,7 @@ public final class Sh4Context {
 		int d = ((code >> 0) & 0x0f);
 		int n = RM(code);
 		
-		Memory.write16(registers[n] + (d << 1), registers[0]);
+		memory.write16i(registers[n] + (d << 1), registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -415,7 +417,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write32(registers[n] + (d << 2), registers[m]);
+		memory.write32i(registers[n] + (d << 2), registers[m]);
 		
 		//System.out.println("MOVLS4 " + Integer.toHexString(registers[n]));
 
@@ -428,7 +430,7 @@ public final class Sh4Context {
 		int d = ((code >> 0) & 0x0f);
 		int m = RM(code);
 
-		byte b =(byte) (Memory.read8(registers[m] + d ) & 0xFF);
+		byte b =(byte) (memory.read8i(registers[m] + d ) & 0xFF);
 		registers[0] = (int)b;
 		
 		cycles--; PC+=2;
@@ -439,7 +441,7 @@ public final class Sh4Context {
 		int d = ((code >> 0) & 0x0f);
 		int m = RM(code);
 
-		short w = (short) Memory.read16(registers[m] + (d << 1));
+		short w = (short) memory.read16i(registers[m] + (d << 1));
 		registers[0] = (int) w;
 
 		
@@ -452,7 +454,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 		
-		registers[n] = Memory.read32(registers[m] + (d << 2));
+		registers[n] = memory.read32i(registers[m] + (d << 2));
 
 		
 		//System.out.println("MOVLL4 " + Integer.toHexString(registers[n]) + " @" + Integer.toHexString(registers[m] + (d *4)) );
@@ -464,7 +466,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write8(registers[n] + registers[0],(byte) registers[m]);
+		memory.write8i(registers[n] + registers[0],(byte) registers[m]);
 
 		cycles--; PC+=2;	
 	}
@@ -474,7 +476,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write16(registers[n] + registers[0], registers[m]);
+		memory.write16i(registers[n] + registers[0], registers[m]);
 	
 		cycles--; PC+=2;
 	}
@@ -484,7 +486,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		Memory.write32(registers[n] + registers[0], registers[m]);
+		memory.write32i(registers[n] + registers[0], registers[m]);
 
 		cycles--; PC+=2;
 		
@@ -495,7 +497,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		byte b = (byte)Memory.read8(registers[m] + registers[0]);
+		byte b = (byte)memory.read8i(registers[m] + registers[0]);
 		registers[n] = (int)b;
 
 		cycles--; PC+=2;
@@ -507,7 +509,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		short w =(short) Memory.read16(registers[m] + registers[0]);
+		short w =(short) memory.read16i(registers[m] + registers[0]);
 		registers[n] = (int)w;
 
 		cycles--; PC+=2;
@@ -519,7 +521,7 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		registers[n] = Memory.read32(registers[m] + registers[0]);
+		registers[n] = memory.read32i(registers[m] + registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -529,7 +531,7 @@ public final class Sh4Context {
 	{
 		int d = (code & 0xff);
 
-		Memory.write8(GBR + d ,(byte) registers[0]);
+		memory.write8i(GBR + d ,(byte) registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -539,7 +541,7 @@ public final class Sh4Context {
 	{
 		int d = ((code >> 0) & 0xff);
 
-		Memory.write16(GBR + (d << 1), registers[0]);
+		memory.write16i(GBR + (d << 1), registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -549,7 +551,7 @@ public final class Sh4Context {
 	{
 		int d = ((code >> 0) & 0xff);
 
-		Memory.write32(GBR + (d << 2), registers[0]);
+		memory.write32i(GBR + (d << 2), registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -559,7 +561,7 @@ public final class Sh4Context {
 	{
 		int d = ((code >> 0) & 0xff);
 
-		byte b = (byte)Memory.read8(GBR + (d << 0));
+		byte b = (byte)memory.read8i(GBR + (d << 0));
 		registers[0] = (int)b;
 
 		cycles--; PC+=2;
@@ -570,7 +572,7 @@ public final class Sh4Context {
 	{
 		int d = ((code >> 0) & 0xff);
 
-		short w = (short)Memory.read16(GBR + (d << 1));
+		short w = (short)memory.read16i(GBR + (d << 1));
 		registers[0] = (int)w;
 
 		cycles--; PC+=2;
@@ -581,7 +583,7 @@ public final class Sh4Context {
 	{
 		int d = ((code >> 0) & 0xff);
 
-		registers[0] = Memory.read32(GBR + (d << 2));
+		registers[0] = memory.read32i(GBR + (d << 2));
 
 		
 		cycles--; PC+=2;
@@ -591,7 +593,7 @@ public final class Sh4Context {
 	{
 		int n = RN(code);
 
-		Memory.write32(registers[n], registers[0]);
+		memory.write32i(registers[n], registers[0]);
 
 		cycles--; PC+=2;
 		
@@ -1126,9 +1128,9 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		tempn = Memory.read32(registers[n]);
+		tempn = memory.read32i(registers[n]);
 		registers[n] += 4;
-		tempm = Memory.read32(registers[m]);
+		tempm = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		if ((tempn^tempm) < 0)
@@ -1227,9 +1229,9 @@ public final class Sh4Context {
 		int m = RM(code);
 		int n = RN(code);
 
-		tempn =  Memory.read16(registers[n]);
+		tempn =  memory.read16i(registers[n]);
 		registers[n] += 2;
-		tempm = Memory.read16(registers[m]);
+		tempm = memory.read16i(registers[m]);
 		registers[m] += 2;
 		
 		templ = MACL;
@@ -1419,8 +1421,8 @@ public final class Sh4Context {
 	{
 		int i =(byte) ((code >> 0) & 0xff);
 
-		int value = (byte) Memory.read8(GBR + registers[0]);
-		Memory.write8(GBR + registers[0],((byte)(value & i)));
+		int value = (byte) memory.read8i(GBR + registers[0]);
+		memory.write8i(GBR + registers[0],((byte)(value & i)));
 
 		cycles-= 4;
 		PC+=2;
@@ -1462,8 +1464,8 @@ public final class Sh4Context {
 	{
 		int i = ((code >> 0) & 0xff);
 
-		int value = Memory.read8(GBR + registers[0]);
-		Memory.write8(GBR + registers[0],((byte)(value | i)));
+		int value = memory.read8i(GBR + registers[0]);
+		memory.write8i(GBR + registers[0],((byte)(value | i)));
 
 		cycles-=4;
 	}
@@ -1472,11 +1474,11 @@ public final class Sh4Context {
 	{
 		int n = RN(code);
 
-		byte value = (byte)Memory.read8(registers[n]);
+		byte value = (byte)memory.read8i(registers[n]);
 		if (value == 0)
 			SR |=0x1;
 		else SR &=~0x1;
-		Memory.write8(registers[n],((byte)(value | 0x80)));
+		memory.write8i(registers[n],((byte)(value | 0x80)));
 
 		cycles-=5;
 		
@@ -1511,7 +1513,7 @@ public final class Sh4Context {
 	{
 		int i = ((code >> 0) & 0xff);
 
-		int value = Memory.read8(GBR + registers[0]);
+		int value = memory.read8i(GBR + registers[0]);
 		if((value & i) == 0)
 			SR |= flagT;
 		else SR &= (~flagT);
@@ -1542,8 +1544,8 @@ public final class Sh4Context {
 	{
 		int i = ((code >> 0) & 0xff);
 
-		int value = Memory.read8(GBR + registers[0]);
-		Memory.write8(GBR + registers[0],((byte)(value ^ i)));
+		int value = memory.read8i(GBR + registers[0]);
+		memory.write8i(GBR + registers[0],((byte)(value ^ i)));
 
 		cycles-=4;PC+=2;
 	}
@@ -1840,7 +1842,7 @@ public final class Sh4Context {
 
 			int pc = PC + (d << 1) + 4;
 	
-			decode(Memory.read16(PC+2));
+			decode(memory.read16i(PC+2));
 
 			PC = pc ;
 			
@@ -1881,7 +1883,7 @@ public final class Sh4Context {
 			
 			int pc = PC + (d << 1) + 4;
 			
-			decode(Memory.read16(PC+2));
+			decode(memory.read16i(PC+2));
 
 			PC = pc;
 			cycles--;	
@@ -1902,7 +1904,7 @@ public final class Sh4Context {
 		
 		int pc = PC +4+(disp<<1);
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 		
 		PC=pc;
 		
@@ -1921,7 +1923,7 @@ public final class Sh4Context {
 			
 		int pc = PC + (disp << 1) + 4;
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 		
 		PC = pc;
 		
@@ -1934,7 +1936,7 @@ public final class Sh4Context {
 				
 		int pc = PC  + registers[n] + 4;
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 
 		PC = pc;
 		cycles-=2;
@@ -1948,7 +1950,7 @@ public final class Sh4Context {
 
 		int pc = PC + registers[n] + 4;
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 			
 		PC = pc;
 		
@@ -1961,7 +1963,7 @@ public final class Sh4Context {
 		
 		int target = registers[n];
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 
 		PC = target;
 				
@@ -1976,7 +1978,7 @@ public final class Sh4Context {
 	
 		int target = registers[n];
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 		
 		PC = target;
 		
@@ -1986,7 +1988,7 @@ public final class Sh4Context {
 	private final void  RTS(int code)
 	{
 		int pc = PR;
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 		PC = pc;
 		cycles-=2;
 	}
@@ -2001,7 +2003,7 @@ public final class Sh4Context {
 			switch_gpr_banks();
 		}
 		
-		decode(Memory.read16(PC+2));
+		decode(memory.read16i(PC+2));
 
 		PC = SPC;
 		
@@ -2113,7 +2115,7 @@ public final class Sh4Context {
 
 		int rb = (SR & flagsRB);
 
-		SR = Memory.read32(registers[m]) & 0x700083f3;
+		SR = memory.read32i(registers[m]) & 0x700083f3;
 
 		if(((SR & flagsRB) != rb) && ((SR & flagMD)!=0))
 		{
@@ -2129,7 +2131,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		GBR = Memory.read32(registers[m]);
+		GBR = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=3;PC+=2;
@@ -2139,7 +2141,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		VBR = Memory.read32(registers[m]);
+		VBR = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2150,7 +2152,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		SSR = Memory.read32(registers[m]);
+		SSR = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2161,7 +2163,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		SPC = Memory.read32(registers[m]);
+		SPC = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2172,7 +2174,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		DBR = Memory.read32(registers[m]);
+		DBR = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2184,7 +2186,7 @@ public final class Sh4Context {
 		int b = ((code >> 4) & 0x07) + 16;
 		int m = RN(code);
 
-		registers[b] = Memory.read32(registers[m]);
+		registers[b] = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2229,7 +2231,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		MACH = Memory.read32(registers[m]);
+		MACH = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		
@@ -2240,7 +2242,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		MACL = Memory.read32(registers[m]);
+		MACL = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles-=2;PC+=2;
@@ -2252,7 +2254,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		PR = Memory.read32(registers[m]);
+		PR = memory.read32i(registers[m]);
 		
 	//	System.out.println("LSMPR Register[ " + m + "] to MACL " + Integer.toHexString(PR));
 				
@@ -2294,8 +2296,8 @@ public final class Sh4Context {
 	{
 		System.out.println("PREF CALLED");
 		int n = RN(code);
-		final int QACR0 = Memory.regmapReadhandle32(MMREG.QACR0);
-		final int QACR1 = Memory.regmapReadhandle32(MMREG.QACR1);
+		final int QACR0 = memory.regmapReadhandle32i(MMREG.QACR0);
+		final int QACR1 = memory.regmapReadhandle32i(MMREG.QACR1);
 		int addr;
 		IntBuffer src;
 		if (registers[n] >= 0xe0000000 && registers[n] <= 0xeffffffc)
@@ -2304,11 +2306,11 @@ public final class Sh4Context {
 
 		    if ((registers[n] & 0x20)!=0)
 		    {
-		    	src = Memory.SQ0;
+		    	src = memory.getSQ0();
 		    	addr |= 0x20;
 			}
 			else
-				src = Memory.SQ1;
+				src = memory.getSQ1();
 		
 			if ((addr >= 0x10000000) && (addr < 0x10800000))
 			{
@@ -2316,7 +2318,7 @@ public final class Sh4Context {
 			}
 			else
 			{
-				Memory.sqWriteToMemory(addr,(registers[n] & 0x20));
+				memory.sqWriteTomemoryInst(addr,(registers[n] & 0x20));
 			}
 		}
 		cycles--; PC+=2;
@@ -2424,7 +2426,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], SR);
+		memory.write32i(registers[n], SR);
 
 		cycles-=2;PC+=2;
 		
@@ -2435,7 +2437,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], GBR);
+		memory.write32i(registers[n], GBR);
 
 		cycles-=2;PC+=2;
 		
@@ -2446,7 +2448,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], VBR);
+		memory.write32i(registers[n], VBR);
 
 		cycles-=2;PC+=2;
 		
@@ -2457,7 +2459,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n],SSR);
+		memory.write32i(registers[n],SSR);
 
 		cycles-=2;PC+=2;
 		
@@ -2468,7 +2470,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], SPC);
+		memory.write32i(registers[n], SPC);
 
 		cycles-=2;PC+=2;
 		
@@ -2479,7 +2481,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], SGR);
+		memory.write32i(registers[n], SGR);
 
 		cycles-=3;PC+=2;
 	}
@@ -2489,7 +2491,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], DBR);
+		memory.write32i(registers[n], DBR);
 
 		cycles-=2;PC+=2;
 		
@@ -2501,7 +2503,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], registers[b]);
+		memory.write32i(registers[n], registers[b]);
 
 		cycles-=2;PC+=2;
 		
@@ -2544,7 +2546,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], MACH);
+		memory.write32i(registers[n], MACH);
 
 		cycles--; PC+=2;
 		
@@ -2555,7 +2557,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], MACL);
+		memory.write32i(registers[n], MACL);
 
 		cycles--; PC+=2;
 		
@@ -2566,7 +2568,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], PR);
+		memory.write32i(registers[n], PR);
 
 		cycles-=2;	PC+=2;	
 	}
@@ -2575,14 +2577,14 @@ public final class Sh4Context {
 	{
 		int imm;
 		imm=(0x000000FF & code);
-		Memory.regmapWritehandle32(MMREG.TRA,imm<<2);
+		memory.regmapWritehandle32Inst(MMREG.TRA,imm<<2);
 		SSR=SR;
 		SPC=PC+2;
 		SGR=registers[15];
 		SR |= flagMD;
 		SR |= flagBL;
 		SR |= flagsRB;
-		Memory.regmapWritehandle32(MMREG.EXPEVT,0x00000160);
+		memory.regmapWritehandle32Inst(MMREG.EXPEVT,0x00000160);
 		PC=VBR+0x00000100;
 		cycles-=7;PC+=2;
 	}
@@ -2620,7 +2622,7 @@ public final class Sh4Context {
 
 		int fr = (FPSCR & flagFR);
 
-		FPSCR = Memory.read32(registers[m]) & 0x003fffff;
+		FPSCR = memory.read32i(registers[m]) & 0x003fffff;
 		registers[m] += 4;
 
 		if((FPSCR & flagFR) != fr)
@@ -2636,7 +2638,7 @@ public final class Sh4Context {
 	{
 		int m = RN(code);
 
-		FPUL = Memory.read32(registers[m]);
+		FPUL = memory.read32i(registers[m]);
 		registers[m] += 4;
 
 		cycles--; PC+=2;
@@ -2668,7 +2670,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], FPSCR);
+		memory.write32i(registers[n], FPSCR);
 
 		cycles--; PC+=2;
 		
@@ -2679,7 +2681,7 @@ public final class Sh4Context {
 		int n = RN(code);
 
 		registers[n] -= 4;
-		Memory.write32(registers[n], FPUL);
+		memory.write32i(registers[n], FPUL);
 
 		cycles--; PC+=2;
 		
@@ -2754,14 +2756,14 @@ public final class Sh4Context {
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 0;
 
-				Memory.read64(registers[m],FRm,n << 1);
+				memory.read64i(registers[m],FRm,n << 1);
 			}
 			else
 			{
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 8;
 
-				Memory.read64(registers[m],FRm,n << 1);
+				memory.read64i(registers[m],FRm,n << 1);
 			}
 			cycles--; PC+=2;
 		}
@@ -2770,7 +2772,7 @@ public final class Sh4Context {
 			int m = ((code >> 4) & 0xf);
 			int n = ((code >> 8) & 0xf);
 
-			FRm[n] = Float.intBitsToFloat(Memory.read32(registers[m]));
+			FRm[n] = Float.intBitsToFloat(memory.read32i(registers[m]));
 			//Sh4Context.debugging = true;
 			//System.out.println("FMOV LOAD to " + "FR[" + n + "] from R[" + m + "] " +  Integer.toHexString(Float.floatToRawIntBits(FRm[n])) + " valor non hex" + (int)FRm[n]);
 			cycles--; PC+=2;
@@ -2791,14 +2793,14 @@ public final class Sh4Context {
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 0;
 
-				Memory.read64(registers[m]+ registers[0],FRm,n << 1);
+				memory.read64i(registers[m]+ registers[0],FRm,n << 1);
 			}
 			else
 			{
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 8;
 
-				Memory.read64(registers[m]+ registers[0],FRm,n << 1);
+				memory.read64i(registers[m]+ registers[0],FRm,n << 1);
 			}
 			cycles--; PC+=2;
 		}
@@ -2807,8 +2809,8 @@ public final class Sh4Context {
 			int m = ((code >> 4) & 0xf);
 			int n = ((code >> 8) & 0xf);
 
-			FRm[n] = Float.intBitsToFloat(Memory.read32(registers[m] + registers[0]));
-			//System.out.println("FMOV INDEX LOAD to " + "FR[" + n + "] from R[" + m + "] " + Float.toHexString((float) Memory.read32(registers[m] + registers[0])));
+			FRm[n] = Float.intBitsToFloat(memory.read32i(registers[m] + registers[0]));
+			//System.out.println("FMOV INDEX LOAD to " + "FR[" + n + "] from R[" + m + "] " + Float.toHexString((float) memory.read32i(registers[m] + registers[0])));
 			cycles--; PC+=2;
 		}
 
@@ -2826,7 +2828,7 @@ public final class Sh4Context {
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 0;
 
-				Memory.read64(registers[m],FRm,n << 1);
+				memory.read64i(registers[m],FRm,n << 1);
 				registers[m] += 8;
 			}
 			else
@@ -2834,7 +2836,7 @@ public final class Sh4Context {
 				int m = ((code >> 4) & 0xf);
 				int n =	((code >> 9) & 0x7) + 8;
 
-				Memory.read64(registers[m],FRm,n << 1);
+				memory.read64i(registers[m],FRm,n << 1);
 				registers[m] += 8;
 			}
 			cycles--; PC+=2;
@@ -2844,7 +2846,7 @@ public final class Sh4Context {
 			int m = ((code >> 4) & 0xf);
 			int n = ((code >> 8) & 0xf);
 
-			FRm[n] = Float.intBitsToFloat(Memory.read32(registers[m]));
+			FRm[n] = Float.intBitsToFloat(memory.read32i(registers[m]));
 			//System.out.println("FMOV RESTORE to " + "FR[" + n + "] from R[" + m + "] " +  Integer.toHexString(Float.floatToRawIntBits(FRm[n])));
 			registers[m] += 4;
 			cycles--; PC+=2;
@@ -2865,8 +2867,8 @@ public final class Sh4Context {
 				int n =	((code >> 8) & 0xf);
 
 				registers[n] -= 8;
-				Memory.write64(registers[n],FRm,m <<1);
-				//memWrite64(registers[n], (u64*)&sh4.dbli[m]);
+				memory.write64i(registers[n],FRm,m <<1);
+				//memwrite64i(registers[n], (u64*)&sh4.dbli[m]);
 			}
 			else
 			{
@@ -2874,8 +2876,8 @@ public final class Sh4Context {
 				int n =	((code >> 8) & 0xf);
 
 				registers[n] -= 8;
-				Memory.write64(registers[n],FRm,m <<1);
-				//memWrite64(registers[n], (u64*)&sh4.dbli[m]);
+				memory.write64i(registers[n],FRm,m <<1);
+				//memwrite64i(registers[n], (u64*)&sh4.dbli[m]);
 			}
 			cycles--; PC+=2;
 		}
@@ -2885,7 +2887,7 @@ public final class Sh4Context {
 			int n = ((code >> 8) & 0xf);
 
 			registers[n] -= 4;
-			Memory.write32(registers[n],Float.floatToIntBits(FRm[m]));
+			memory.write32i(registers[n],Float.floatToIntBits(FRm[m]));
 			//System.out.println("FMOV SAVE from " + "FR[" + m + "] to R[" + n + "] ->" + Integer.toHexString(registers[n])  + " value " +  Integer.toHexString(Float.floatToRawIntBits(FRm[n])));
 			cycles--; PC+=2;
 		}
@@ -2900,16 +2902,16 @@ public final class Sh4Context {
 				int m = ((code >> 5) & 0x7) + 0;
 				int n =	((code >> 8) & 0xf);
 
-				Memory.write64(registers[n],FRm,m <<1);
-				//memWrite64(registers[n], (u64*)&sh4.dbli[m]);
+				memory.write64i(registers[n],FRm,m <<1);
+				//memwrite64i(registers[n], (u64*)&sh4.dbli[m]);
 			}
 			else
 			{
 				int m = ((code >> 5) & 0x7) + 8;
 				int n =	((code >> 8) & 0xf);
 
-				Memory.write64(registers[n],FRm,m <<1);
-				//memWrite64(registers[n], (u64*)&sh4.dbli[m]);
+				memory.write64i(registers[n],FRm,m <<1);
+				//memwrite64i(registers[n], (u64*)&sh4.dbli[m]);
 			}
 			cycles--; PC+=2;
 		}
@@ -2918,7 +2920,7 @@ public final class Sh4Context {
 			int m = ((code >> 4) & 0xf);
 			int n = ((code >> 8) & 0xf);
 
-			Memory.write32(registers[n],Float.floatToRawIntBits(FRm[m]));
+			memory.write32i(registers[n],Float.floatToRawIntBits(FRm[m]));
 			//System.out.println("FMOV STORE to " + "R[" + n + "] from FR[" + m + "] " + Integer.toHexString(Float.floatToIntBits(FRm[m])) + "value non hex " + (int) FRm[m]);
 			cycles--; PC+=2;
 		}
@@ -2936,17 +2938,17 @@ public final class Sh4Context {
 				int m = ((code >> 5) & 0x7) + 0;
 				int n =	((code >> 8) & 0xf);
 
-				Memory.write64(registers[n]+ registers[0] ,FRm,m <<1);
-				//memWrite64(registers[n] + registers[0], (u64*)&sh4.dbli[m]);
+				memory.write64i(registers[n]+ registers[0] ,FRm,m <<1);
+				//memwrite64i(registers[n] + registers[0], (u64*)&sh4.dbli[m]);
 			}
 			else
 			{
 				int m = ((code >> 5) & 0x7) + 8;
 				int n =	((code >> 8) & 0xf);
 
-				Memory.write64(registers[n]+ registers[0] ,FRm,m <<1);
+				memory.write64i(registers[n]+ registers[0] ,FRm,m <<1);
 				
-				//memWrite64(registers[n] + registers[0], (u64*)&sh4.dbli[m]);
+				//memwrite64i(registers[n] + registers[0], (u64*)&sh4.dbli[m]);
 			}
 			cycles--; PC+=2;
 		}
@@ -2955,7 +2957,7 @@ public final class Sh4Context {
 			int m = ((code >> 4) & 0xf);
 			int n = ((code >> 8) & 0xf);
 
-			Memory.write32(registers[n] + registers[0], (int)FRm[m]);
+			memory.write32i(registers[n] + registers[0], (int)FRm[m]);
 			//System.out.println("FMOV INDEX STORE to " + "FR[" + m+ "] from R[" + n + "] " +  Integer.toHexString(Float.floatToRawIntBits(FRm[m])));
 			cycles--; PC+=2;
 		}
@@ -3467,7 +3469,7 @@ public final class Sh4Context {
 	public void run(){
 		int opcode;
 		for(;cycles >= 0;){
-			opcode = Memory.read16(PC);
+			opcode = memory.read16i(PC);
 						
 			decode(opcode);
 			
@@ -3479,14 +3481,18 @@ public final class Sh4Context {
 	}
 	
 	public void Step(int pc){
-		decode(Memory.read16(pc));
+		decode(memory.read16i(pc));
 		PC+=2;
+	}
+
+	protected void printDebugMaybe(int instruction){
+		if(debugging)
+			Sh4Helper.printState(this, instruction);
 	}
 
 	private final void decode(int instruction)
 	{	
-		if(debugging)
-			Sh4Helper.printState(this, instruction);
+		printDebugMaybe(instruction);
 		
 	    switch ((instruction >>> 12) & 0xf) 
 		{

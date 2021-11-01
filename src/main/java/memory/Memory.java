@@ -21,11 +21,11 @@ import org.lwjgl.BufferUtils;
 
 import powervr.PowerVR;
 /*
- * 
+ *
  *  INDEXES ARE IN TERMS OF BYTES NO MATTER WHAT
- * 
+ *
  */
-public final class Memory {
+public final class Memory implements IMemory {
 
 	/* memory sizes */
 		
@@ -207,6 +207,8 @@ public final class Memory {
 	public static final int _dword_index(int address){
 		return address >>> 2;
 	}
+
+	public static final Memory INSTANCE = new Memory();
 	
 	static {
 		bios = ByteBuffer.allocate(biosSize);
@@ -505,7 +507,62 @@ public final class Memory {
 			}
 		}
 	}
-	
+
+	@Override
+	public int read32i(int i) {
+		return read32(i);
+	}
+
+	@Override
+	public void write16i(int register, int register1) {
+		write16(register, register1);
+	}
+
+	@Override
+	public void write32i(int register, int register1) {
+		write32(register, register1);
+	}
+
+	@Override
+	public int read8i(int register) {
+		return read8(register);
+	}
+
+	@Override
+	public int read16i(int register) {
+		return read16(register);
+	}
+
+	@Override
+	public void write8i(int register, byte register1) {
+		write8(register, register1);
+	}
+
+	@Override
+	public void sqWriteTomemoryInst(int addr, int i) {
+		Memory.sqWriteToMemory(addr, i);
+	}
+
+	@Override
+	public void regmapWritehandle32Inst(int tra, int i) {
+		regmapWritehandle32(tra, i);
+	}
+
+	@Override
+	public void read64i(int register, float[] fRm, int i) {
+		read64(register, fRm, i);
+	}
+
+	@Override
+	public void write64i(int i, float[] fRm, int i1) {
+		write64(i, fRm, i1);
+	}
+
+	@Override
+	public int regmapReadhandle32i(int qacr0) {
+		return regmapReadhandle32(qacr0);
+	}
+
 	public static void write16(int address,int val) {
 		//Logger.log(Logger.MEM,"WORD WRITE @"  + Integer.toHexString(address));
 		switch(mem_zone_hash[getMemoryZone(address)]){
@@ -958,8 +1015,18 @@ public final class Memory {
 			return regmap.getInt(address);
 		}
 
-		
-		public static final int regmapReadhandle8(int address) {
+	@Override
+	public IntBuffer getSQ0() {
+		return SQ0;
+	}
+
+	@Override
+	public IntBuffer getSQ1() {
+		return SQ1;
+	}
+
+
+	public static final int regmapReadhandle8(int address) {
 			return (int)regmap.get(address) & 0xFF;
 		}
 

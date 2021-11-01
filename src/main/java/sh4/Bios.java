@@ -336,7 +336,7 @@ public class Bios {
 	public static final int GDROM_CMD_GETSES = 35;
 
 
-	private static Sh4Context sh4 = Emu.sh4cpu;
+	private static Sh4Context sh4 = Emu.getSh4cpu();
 	
 	public static final void handler(int PC){
 		System.out.println("BIOS CALLED with argument " + Integer.toHexString(PC));

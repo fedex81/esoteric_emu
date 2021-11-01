@@ -224,8 +224,8 @@ public class PowerVR {
 		
 		Display.update();
 		
-		for(int i =0; i < Emu.connectedDevices; i++){
-			Emu.ports[i].ReadDeviceInput();
+		for(int i =0; i < Emu.getConnectedDevices(); i++){
+			Emu.getPorts()[i].ReadDeviceInput();
 		}
 		//System.out.println("RENDER INPUT " + Keyboard.getNumKeyboardEvents());
 		

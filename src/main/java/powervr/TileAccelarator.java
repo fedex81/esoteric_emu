@@ -381,7 +381,7 @@ public class TileAccelarator {
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
-		 Emu.interruptController.addInterrupts(Intc.ASIC_EVT_PVR_RENDERDONE);
+		 Emu.getInterruptController().addInterrupts(Intc.ASIC_EVT_PVR_RENDERDONE);
 	}
 	
 	/*
@@ -708,7 +708,7 @@ public class TileAccelarator {
 		 if (pvr_registering != -1)
 		 {
 			//pvr_listdone |= (1 << pvr_registering);
-			Emu.interruptController.addInterrupts(pvr_lists[pvr_registering]);
+			Emu.getInterruptController().addInterrupts(pvr_lists[pvr_registering]);
 		 	pvr_registering = -1;
 		  }
 	  }

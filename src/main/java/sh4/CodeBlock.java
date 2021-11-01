@@ -34,13 +34,14 @@ public class CodeBlock {
 		final int n = first_arg;
 		final int m = second_arg;
 		final int t = third_arg;
+		final Sh4Context sh4cpu = Emu.getSh4cpu();
 		if(!finished){
 			switch (instruction) {
 			case  NativeOpcode.MOVI : 
 				block.add(new NativeOpcode(){
 					public void call() {
-						if ((m&0x80)==0) Emu.sh4cpu.registers[n]=(0x000000FF & m);
-						else Emu.sh4cpu.registers[n] =(0xFFFFFF00 | m);				
+						if ((m&0x80)==0) sh4cpu.registers[n]=(0x000000FF & m);
+						else sh4cpu.registers[n] =(0xFFFFFF00 | m);				
 					}				
 				});
 			cycles += 1;	
@@ -50,10 +51,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read16(m);
+						sh4cpu.registers[n] = Memory.read16(m);
 						
-						if ((Emu.sh4cpu.registers[n]&0x8000)==0) Emu.sh4cpu.registers[n] &= 0x0000FFFF;
-						else Emu.sh4cpu.registers[n] |= 0xFFFF0000;
+						if ((sh4cpu.registers[n]&0x8000)==0) sh4cpu.registers[n] &= 0x0000FFFF;
+						else sh4cpu.registers[n] |= 0xFFFF0000;
 					}
 					
 				});
@@ -63,7 +64,7 @@ public class CodeBlock {
 				block.add(new NativeOpcode(){
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read32(m);
+						sh4cpu.registers[n] = Memory.read32(m);
 					}
 				
 				});
@@ -74,7 +75,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] = sh4cpu.registers[m];
 					}
 				
 				});
@@ -86,7 +87,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write8(Emu.sh4cpu.registers[n],(byte) (Emu.sh4cpu.registers[m] & 0xFF));
+						Memory.write8(sh4cpu.registers[n],(byte) (sh4cpu.registers[m] & 0xFF));
 					}
 				
 				});
@@ -96,7 +97,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write16(Emu.sh4cpu.registers[n], (Emu.sh4cpu.registers[m] & 0xFFFF));
+						Memory.write16(sh4cpu.registers[n], (sh4cpu.registers[m] & 0xFFFF));
 					}
 				
 				});
@@ -106,7 +107,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.registers[m]);
+						Memory.write32(sh4cpu.registers[n], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -116,10 +117,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read8(Emu.sh4cpu.registers[m]);
+						sh4cpu.registers[n] = Memory.read8(sh4cpu.registers[m]);
 
-						if ((Emu.sh4cpu.registers[n]&0x80)==0) Emu.sh4cpu.registers[n]&=0x000000FF;
-						else Emu.sh4cpu.registers[n]|=0xFFFFFF00;
+						if ((sh4cpu.registers[n]&0x80)==0) sh4cpu.registers[n]&=0x000000FF;
+						else sh4cpu.registers[n]|=0xFFFFFF00;
 					}
 				
 				});
@@ -129,7 +130,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read16(Emu.sh4cpu.registers[m]);
+						sh4cpu.registers[n] = Memory.read16(sh4cpu.registers[m]);
 					}
 				
 				});
@@ -138,7 +139,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read32(Emu.sh4cpu.registers[m]);
+						sh4cpu.registers[n] = Memory.read32(sh4cpu.registers[m]);
 					}
 				
 				});
@@ -148,8 +149,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 1;
-						Memory.write8(Emu.sh4cpu.registers[n],(byte) Emu.sh4cpu.registers[m]);
+						sh4cpu.registers[n] -= 1;
+						Memory.write8(sh4cpu.registers[n],(byte) sh4cpu.registers[m]);
 					}
 				
 				});
@@ -159,9 +160,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 2;
+						sh4cpu.registers[n] -= 2;
 
-						Memory.write16(Emu.sh4cpu.registers[n], Emu.sh4cpu.registers[m]);
+						Memory.write16(sh4cpu.registers[n], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -171,9 +172,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
+						sh4cpu.registers[n] -= 4;
 						
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.registers[m]);
+						Memory.write32(sh4cpu.registers[n], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -183,8 +184,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read8(Emu.sh4cpu.registers[m]);
-						if(n != m) Emu.sh4cpu.registers[m] += 1;
+						sh4cpu.registers[n] = Memory.read8(sh4cpu.registers[m]);
+						if(n != m) sh4cpu.registers[m] += 1;
 					}
 				
 				});
@@ -194,8 +195,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read16(Emu.sh4cpu.registers[m]);
-						if(n != m) Emu.sh4cpu.registers[m] += 2;
+						sh4cpu.registers[n] = Memory.read16(sh4cpu.registers[m]);
+						if(n != m) sh4cpu.registers[m] += 2;
 					}
 				
 				});
@@ -205,8 +206,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read32(Emu.sh4cpu.registers[m]);
-						if(n != m) Emu.sh4cpu.registers[m] += 4;
+						sh4cpu.registers[n] = Memory.read32(sh4cpu.registers[m]);
+						if(n != m) sh4cpu.registers[m] += 4;
 					}
 				
 				});
@@ -216,7 +217,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write8(Emu.sh4cpu.registers[n] + m ,(byte) Emu.sh4cpu.registers[0]);
+						Memory.write8(sh4cpu.registers[n] + m ,(byte) sh4cpu.registers[0]);
 					}
 				
 				});
@@ -226,7 +227,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write16(Emu.sh4cpu.registers[n] + (m << 1), Emu.sh4cpu.registers[0]);
+						Memory.write16(sh4cpu.registers[n] + (m << 1), sh4cpu.registers[0]);
 					}
 				
 				});
@@ -236,7 +237,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write32(Emu.sh4cpu.registers[n] + (m << 2), Emu.sh4cpu.registers[m]);
+						Memory.write32(sh4cpu.registers[n] + (m << 2), sh4cpu.registers[m]);
 					}
 				
 				});
@@ -246,7 +247,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = Memory.read8(Emu.sh4cpu.registers[n] + (m << 0));
+						sh4cpu.registers[0] = Memory.read8(sh4cpu.registers[n] + (m << 0));
 					}
 				
 				});
@@ -256,7 +257,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = Memory.read16(Emu.sh4cpu.registers[n] + (m << 1));
+						sh4cpu.registers[0] = Memory.read16(sh4cpu.registers[n] + (m << 1));
 					}
 				
 				});
@@ -266,7 +267,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read32(Emu.sh4cpu.registers[m] + (t << 2));
+						sh4cpu.registers[n] = Memory.read32(sh4cpu.registers[m] + (t << 2));
 					}
 				
 				});
@@ -276,7 +277,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write8(Emu.sh4cpu.registers[n] + Emu.sh4cpu.registers[0],(byte) Emu.sh4cpu.registers[m]);
+						Memory.write8(sh4cpu.registers[n] + sh4cpu.registers[0],(byte) sh4cpu.registers[m]);
 					}
 				
 				});
@@ -286,7 +287,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write16(Emu.sh4cpu.registers[n] + Emu.sh4cpu.registers[0], Emu.sh4cpu.registers[m]);
+						Memory.write16(sh4cpu.registers[n] + sh4cpu.registers[0], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -296,7 +297,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write32(Emu.sh4cpu.registers[n] + Emu.sh4cpu.registers[0], Emu.sh4cpu.registers[m]);
+						Memory.write32(sh4cpu.registers[n] + sh4cpu.registers[0], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -306,7 +307,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read8(Emu.sh4cpu.registers[m] + Emu.sh4cpu.registers[0]);
+						sh4cpu.registers[n] = Memory.read8(sh4cpu.registers[m] + sh4cpu.registers[0]);
 					}
 				
 				});
@@ -316,7 +317,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read16(Emu.sh4cpu.registers[m] + Emu.sh4cpu.registers[0]);
+						sh4cpu.registers[n] = Memory.read16(sh4cpu.registers[m] + sh4cpu.registers[0]);
 					}
 				
 				});
@@ -326,7 +327,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Memory.read32(Emu.sh4cpu.registers[m] + Emu.sh4cpu.registers[0]);
+						sh4cpu.registers[n] = Memory.read32(sh4cpu.registers[m] + sh4cpu.registers[0]);
 					}
 				
 				});
@@ -336,7 +337,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write8(Emu.sh4cpu.GBR + n ,(byte) Emu.sh4cpu.registers[0]);
+						Memory.write8(sh4cpu.GBR + n ,(byte) sh4cpu.registers[0]);
 					}
 				
 				});
@@ -346,7 +347,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write16(Emu.sh4cpu.GBR + (n << 1), Emu.sh4cpu.registers[0]);
+						Memory.write16(sh4cpu.GBR + (n << 1), sh4cpu.registers[0]);
 					}
 				
 				});
@@ -356,7 +357,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write32(Emu.sh4cpu.GBR + (n << 2), Emu.sh4cpu.registers[0]);
+						Memory.write32(sh4cpu.GBR + (n << 2), sh4cpu.registers[0]);
 					}
 				
 				});
@@ -366,7 +367,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = Memory.read8(Emu.sh4cpu.GBR + n);
+						sh4cpu.registers[0] = Memory.read8(sh4cpu.GBR + n);
 					}
 				
 				});
@@ -376,7 +377,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = Memory.read16(Emu.sh4cpu.GBR + (n << 1));
+						sh4cpu.registers[0] = Memory.read16(sh4cpu.GBR + (n << 1));
 					}
 				
 				});
@@ -386,7 +387,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = Memory.read32(Emu.sh4cpu.GBR + (n << 2));
+						sh4cpu.registers[0] = Memory.read32(sh4cpu.GBR + (n << 2));
 					}
 				
 				});
@@ -396,7 +397,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.registers[0]);
+						Memory.write32(sh4cpu.registers[n], sh4cpu.registers[0]);
 					}
 				
 				});
@@ -406,7 +407,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] = n;
+						sh4cpu.registers[0] = n;
 					}
 				
 				});
@@ -416,7 +417,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = (Emu.sh4cpu.SR & Emu.sh4cpu.flagT);
+						sh4cpu.registers[n] = (sh4cpu.SR & sh4cpu.flagT);
 					}
 				
 				});
@@ -426,10 +427,10 @@ public class CodeBlock {
 
 					public void call() {
 						int temp0,temp1;
-						temp0=Emu.sh4cpu.registers[m]&0xFFFF0000;
-						temp1=(Emu.sh4cpu.registers[m]&0x000000FF)<<8;
-						Emu.sh4cpu.registers[n]=(Emu.sh4cpu.registers[m]&0x0000FF00)>>8;
-						Emu.sh4cpu.registers[n]=Emu.sh4cpu.registers[n]|temp1|temp0;
+						temp0=sh4cpu.registers[m]&0xFFFF0000;
+						temp1=(sh4cpu.registers[m]&0x000000FF)<<8;
+						sh4cpu.registers[n]=(sh4cpu.registers[m]&0x0000FF00)>>8;
+						sh4cpu.registers[n]=sh4cpu.registers[n]|temp1|temp0;
 					}
 				
 				});
@@ -440,9 +441,9 @@ public class CodeBlock {
 					@Override
 					public void call() {
 						int temp=0;
-						temp=(Emu.sh4cpu.registers[m]>>16)&0x0000FFFF;
-						Emu.sh4cpu.registers[n]=Emu.sh4cpu.registers[m]<<16;
-						Emu.sh4cpu.registers[n]|=temp;
+						temp=(sh4cpu.registers[m]>>16)&0x0000FFFF;
+						sh4cpu.registers[n]=sh4cpu.registers[m]<<16;
+						sh4cpu.registers[n]|=temp;
 					}
 				
 				});
@@ -452,8 +453,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = ((Emu.sh4cpu.registers[n] & 0xffff0000) >>> 16) |
-						   ((Emu.sh4cpu.registers[m] & 0x0000ffff) << 16);
+						sh4cpu.registers[n] = ((sh4cpu.registers[n] & 0xffff0000) >>> 16) |
+						   ((sh4cpu.registers[m] & 0x0000ffff) << 16);
 					}
 				
 				});
@@ -463,7 +464,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] += Emu.sh4cpu.registers[m]; 
+						sh4cpu.registers[n] += sh4cpu.registers[m]; 
 					}
 				
 				});
@@ -474,8 +475,8 @@ public class CodeBlock {
 					@Override
 					public void call() {
 						if ((m&0x80)==0)
-							Emu.sh4cpu.registers[n]+=(0x000000FF & m);
-						else Emu.sh4cpu.registers[n]+=(0xFFFFFF00 | m);
+							sh4cpu.registers[n]+=(0x000000FF & m);
+						else sh4cpu.registers[n]+=(0xFFFFFF00 | m);
 					}
 				
 				});
@@ -485,13 +486,13 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int tmp0 = Emu.sh4cpu.registers[n];
-						int tmp1 = Emu.sh4cpu.registers[n] + Emu.sh4cpu.registers[m]; 
-						Emu.sh4cpu.registers[n] = tmp1 + (Emu.sh4cpu.SR & Sh4Context.flagT);
+						int tmp0 = sh4cpu.registers[n];
+						int tmp1 = sh4cpu.registers[n] + sh4cpu.registers[m]; 
+						sh4cpu.registers[n] = tmp1 + (sh4cpu.SR & Sh4Context.flagT);
 						if(tmp0 > tmp1)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
-						if(tmp1 > Emu.sh4cpu.registers[n]) Emu.sh4cpu.SR |= Sh4Context.flagT;
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
+						if(tmp1 > sh4cpu.registers[n]) sh4cpu.SR |= Sh4Context.flagT;
 					}
 				
 				});
@@ -502,19 +503,19 @@ public class CodeBlock {
 					@Override
 					public void call() {
 						int ans=0;
-						int dest = (Emu.sh4cpu.registers[n] >> 31) & 1;
-						int src  = (Emu.sh4cpu.registers[m] >> 31) & 1;
+						int dest = (sh4cpu.registers[n] >> 31) & 1;
+						int src  = (sh4cpu.registers[m] >> 31) & 1;
 					  
 						src += dest;
-						Emu.sh4cpu.registers[n] += Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] += sh4cpu.registers[m];
 
-						ans = (Emu.sh4cpu.registers[n] >> 31) & 1;
+						ans = (sh4cpu.registers[n] >> 31) & 1;
 						ans += dest;
 					  
 						if ((src == 0) || (src == 2))
-							Emu.sh4cpu.SR |= ans;
+							sh4cpu.SR |= ans;
 						else
-							Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+							sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -524,9 +525,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[0] == n)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[0] == n)
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -536,9 +537,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[n] == Emu.sh4cpu.registers[m])
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[n] == sh4cpu.registers[m])
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -548,9 +549,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if((long)Emu.sh4cpu.registers[n] >= (long)Emu.sh4cpu.registers[m])
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if((long)sh4cpu.registers[n] >= (long)sh4cpu.registers[m])
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -560,9 +561,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[n] >= Emu.sh4cpu.registers[m])
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[n] >= sh4cpu.registers[m])
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -572,9 +573,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if (((long)( Emu.sh4cpu.registers[n] & 0xFFFFFFFF)) > ((long)( Emu.sh4cpu.registers[m] & 0xFFFFFFFF)))
-							 Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else  Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if (((long)( sh4cpu.registers[n] & 0xFFFFFFFF)) > ((long)( sh4cpu.registers[m] & 0xFFFFFFFF)))
+							 sh4cpu.SR |= Sh4Context.flagT;
+						else  sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -584,9 +585,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[n] > Emu.sh4cpu.registers[m])
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[n] > sh4cpu.registers[m])
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -596,9 +597,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[n] >= 0)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[n] >= 0)
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -608,9 +609,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if(Emu.sh4cpu.registers[n] > 0)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if(sh4cpu.registers[n] > 0)
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 
 					}
 				
@@ -621,13 +622,13 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int tmp = Emu.sh4cpu.registers[n] ^ Emu.sh4cpu.registers[m];
+						int tmp = sh4cpu.registers[n] ^ sh4cpu.registers[m];
 						int HH  = (tmp >>> 24) & 0x000000FF;
 						int HL  = (tmp >>> 16) & 0x000000FF;
 						int LH  = (tmp >>>  8) & 0x000000FF;
 						int LL  = (tmp >>>  0) & 0x000000FF;
 
-						Emu.sh4cpu.SR  |= ((HH & HL & LH & LL) & 0);
+						sh4cpu.SR  |= ((HH & HL & LH & LL) & 0);
 					}
 				
 				});
@@ -656,9 +657,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						 Emu.sh4cpu.SR &= (~Sh4Context.flagQ);
-						 Emu.sh4cpu.SR &= (~Sh4Context.flagM);
-						 Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						 sh4cpu.SR &= (~Sh4Context.flagQ);
+						 sh4cpu.SR &= (~Sh4Context.flagM);
+						 sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -668,10 +669,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						long mult = (long)Emu.sh4cpu.registers[n] * (long)Emu.sh4cpu.registers[m];
+						long mult = (long)sh4cpu.registers[n] * (long)sh4cpu.registers[m];
 
-						Emu.sh4cpu.MACL = (int)(mult & 0xffffffff);
-						Emu.sh4cpu.MACH = (int)((mult >>> 32) & 0xffffffff);
+						sh4cpu.MACL = (int)(mult & 0xffffffff);
+						sh4cpu.MACH = (int)((mult >>> 32) & 0xffffffff);
 					}
 				
 				});
@@ -681,10 +682,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						long mult = (long)(Emu.sh4cpu.registers[n] & 0xffffffff) * (long)(Emu.sh4cpu.registers[m] & 0xffffffff);
+						long mult = (long)(sh4cpu.registers[n] & 0xffffffff) * (long)(sh4cpu.registers[m] & 0xffffffff);
 
-						Emu.sh4cpu.MACL = (int)(mult & 0xffffffff);
-						Emu.sh4cpu.MACH = (int)((mult >>> 32) & 0xffffffff);
+						sh4cpu.MACL = (int)(mult & 0xffffffff);
+						sh4cpu.MACH = (int)((mult >>> 32) & 0xffffffff);
 					}
 				
 				});
@@ -694,12 +695,12 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n]--;
-						if(Emu.sh4cpu.registers[n] == 0){
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
+						sh4cpu.registers[n]--;
+						if(sh4cpu.registers[n] == 0){
+							sh4cpu.SR |= Sh4Context.flagT;
 						}
 						else{
-							Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+							sh4cpu.SR &= (~Sh4Context.flagT);
 						}
 					}
 				
@@ -710,9 +711,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
-						if ((Emu.sh4cpu.registers[m] & 0x00000080)==0) Emu.sh4cpu.registers[n] &= 0x000000FF;
-						else Emu.sh4cpu.registers[n] |= 0xFFFFFF00;
+						sh4cpu.registers[n] = sh4cpu.registers[m];
+						if ((sh4cpu.registers[m] & 0x00000080)==0) sh4cpu.registers[n] &= 0x000000FF;
+						else sh4cpu.registers[n] |= 0xFFFFFF00;
 					}
 				
 				});
@@ -722,9 +723,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
-						if ((Emu.sh4cpu.registers[m] & 0x00008000)==0) Emu.sh4cpu.registers[n] &= 0x0000FFFF;
-						else Emu.sh4cpu.registers[n] |= 0xFFFF0000;
+						sh4cpu.registers[n] = sh4cpu.registers[m];
+						if ((sh4cpu.registers[m] & 0x00008000)==0) sh4cpu.registers[n] &= 0x0000FFFF;
+						else sh4cpu.registers[n] |= 0xFFFF0000;
 					}
 				
 				});
@@ -733,8 +734,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
-						Emu.sh4cpu.registers[n] &= 0x000000FF;
+						sh4cpu.registers[n] = sh4cpu.registers[m];
+						sh4cpu.registers[n] &= 0x000000FF;
 					}
 				
 				});
@@ -743,8 +744,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
-						Emu.sh4cpu.registers[n] &= 0x0000FFFF;
+						sh4cpu.registers[n] = sh4cpu.registers[m];
+						sh4cpu.registers[n] &= 0x0000FFFF;
 					}
 				
 				});
@@ -753,7 +754,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = Emu.sh4cpu.registers[n] * Emu.sh4cpu.registers[m];
+						sh4cpu.MACL = sh4cpu.registers[n] * sh4cpu.registers[m];
 					}
 				
 				});
@@ -772,7 +773,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = Emu.sh4cpu.registers[n] * Emu.sh4cpu.registers[m];
+						sh4cpu.MACL = sh4cpu.registers[n] * sh4cpu.registers[m];
 					}
 				
 				});
@@ -782,7 +783,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = (short)Emu.sh4cpu.registers[n] * (short)Emu.sh4cpu.registers[m];
+						sh4cpu.MACL = (short)sh4cpu.registers[n] * (short)sh4cpu.registers[m];
 					}
 				
 				});
@@ -792,7 +793,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = (((int)Emu.sh4cpu.registers[n] & 0xFFFF) * ((int)Emu.sh4cpu.registers[m] & 0xFFFF));
+						sh4cpu.MACL = (((int)sh4cpu.registers[n] & 0xFFFF) * ((int)sh4cpu.registers[m] & 0xFFFF));
 					}
 				
 				});
@@ -802,7 +803,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = 0 - Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] = 0 - sh4cpu.registers[m];
 					}
 				
 				});
@@ -812,13 +813,13 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int tmp  = 0 - Emu.sh4cpu.registers[m];
-						Emu.sh4cpu.registers[n] = tmp - (Emu.sh4cpu.SR & Sh4Context.flagT);
+						int tmp  = 0 - sh4cpu.registers[m];
+						sh4cpu.registers[n] = tmp - (sh4cpu.SR & Sh4Context.flagT);
 						if(0 < tmp)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
-						if(tmp < Emu.sh4cpu.registers[n]) 
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
+						if(tmp < sh4cpu.registers[n]) 
+							sh4cpu.SR |= Sh4Context.flagT;
 					}
 				
 				});
@@ -828,7 +829,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] -= sh4cpu.registers[m];
 					}
 				
 				});
@@ -838,15 +839,15 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int tmp0 = Emu.sh4cpu.registers[n];
-						int tmp1 = Emu.sh4cpu.registers[n] - Emu.sh4cpu.registers[m];
-						Emu.sh4cpu.registers[n] = tmp1 - (Emu.sh4cpu.SR & Sh4Context.flagT);
+						int tmp0 = sh4cpu.registers[n];
+						int tmp1 = sh4cpu.registers[n] - sh4cpu.registers[m];
+						sh4cpu.registers[n] = tmp1 - (sh4cpu.SR & Sh4Context.flagT);
 						if(tmp0 < tmp1)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 						
-						if (tmp1 < Emu.sh4cpu.registers[n])
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
+						if (tmp1 < sh4cpu.registers[n])
+							sh4cpu.SR |= Sh4Context.flagT;
 					}
 				
 				});
@@ -857,21 +858,21 @@ public class CodeBlock {
 					@Override
 					public void call() {
 						int ans;
-						int dest = (Emu.sh4cpu.registers[n] >> 31) & 1;
-						int src  = (Emu.sh4cpu.registers[m] >> 31) & 1;
+						int dest = (sh4cpu.registers[n] >> 31) & 1;
+						int src  = (sh4cpu.registers[m] >> 31) & 1;
 					  
 						src += dest;
-						Emu.sh4cpu.registers[n] -= Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] -= sh4cpu.registers[m];
 
-						ans = (Emu.sh4cpu.registers[n] >> 31) & 1;
+						ans = (sh4cpu.registers[n] >> 31) & 1;
 						ans += dest;
 					  
 						if (src == 1)
 					       if (ans == 1)
-					    	   Emu.sh4cpu.SR |= Sh4Context.flagT;
-					       else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+					    	   sh4cpu.SR |= Sh4Context.flagT;
+					       else sh4cpu.SR &= (~Sh4Context.flagT);
 						else
-							Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+							sh4cpu.SR &= (~Sh4Context.flagT);
 
 					}
 				
@@ -882,7 +883,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] &= Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] &= sh4cpu.registers[m];
 					}
 				
 				});
@@ -892,7 +893,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] &= n; 
+						sh4cpu.registers[0] &= n; 
 					}
 				
 				});
@@ -902,8 +903,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int value = (byte) Memory.read8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0]);
-						Memory.write8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0],((byte)(value & n)));
+						int value = (byte) Memory.read8(sh4cpu.GBR + sh4cpu.registers[0]);
+						Memory.write8(sh4cpu.GBR + sh4cpu.registers[0],((byte)(value & n)));
 					}
 				
 				});
@@ -913,7 +914,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = ~Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] = ~sh4cpu.registers[m];
 					}
 				
 				});
@@ -923,7 +924,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] |= Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] |= sh4cpu.registers[m];
 					}
 				
 				});
@@ -933,7 +934,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] |= n; 
+						sh4cpu.registers[0] |= n; 
 					}
 				
 				});
@@ -943,8 +944,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int value = Memory.read8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0]);
-						Memory.write8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0],((byte)(value | n)));
+						int value = Memory.read8(sh4cpu.GBR + sh4cpu.registers[0]);
+						Memory.write8(sh4cpu.GBR + sh4cpu.registers[0],((byte)(value | n)));
 					}
 				
 				});
@@ -954,11 +955,11 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						byte value = (byte)Memory.read8(Emu.sh4cpu.registers[n]);
+						byte value = (byte)Memory.read8(sh4cpu.registers[n]);
 						if (value == 0)
-							Emu.sh4cpu.SR |=0x1;
-						else Emu.sh4cpu.SR &=~0x1;
-						Memory.write8(Emu.sh4cpu.registers[n],((byte)(value | 0x80)));
+							sh4cpu.SR |=0x1;
+						else sh4cpu.SR &=~0x1;
+						Memory.write8(sh4cpu.registers[n],((byte)(value | 0x80)));
 					}
 				
 				});
@@ -968,9 +969,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if((Emu.sh4cpu.registers[n] & Emu.sh4cpu.registers[m]) == 0)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if((sh4cpu.registers[n] & sh4cpu.registers[m]) == 0)
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -980,9 +981,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if((Emu.sh4cpu.registers[0] & n) !=0)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else  Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						if((sh4cpu.registers[0] & n) !=0)
+							sh4cpu.SR |= Sh4Context.flagT;
+						else  sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -992,10 +993,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int value = Memory.read8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0]);
+						int value = Memory.read8(sh4cpu.GBR + sh4cpu.registers[0]);
 						if((value & n) == 0)
-							Emu.sh4cpu.SR |= Sh4Context.flagT;
-						else Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+							sh4cpu.SR |= Sh4Context.flagT;
+						else sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -1005,7 +1006,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] ^= Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] ^= sh4cpu.registers[m];
 					}
 				
 				});
@@ -1015,7 +1016,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[0] ^= n; 
+						sh4cpu.registers[0] ^= n; 
 					}
 				
 				});
@@ -1025,8 +1026,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int value = Memory.read8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0]);
-						Memory.write8(Emu.sh4cpu.GBR + Emu.sh4cpu.registers[0],((byte)(value ^ n)));
+						int value = Memory.read8(sh4cpu.GBR + sh4cpu.registers[0]);
+						Memory.write8(sh4cpu.GBR + sh4cpu.registers[0],((byte)(value ^ n)));
 					}
 				
 				});
@@ -1036,10 +1037,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR = (Emu.sh4cpu.registers[n] >> 0) & 1;
+						sh4cpu.SR = (sh4cpu.registers[n] >> 0) & 1;
 
-						Emu.sh4cpu.registers[n] = ((Emu.sh4cpu.registers[n] & 0x00000001) << 31) |
-								   ((Emu.sh4cpu.registers[n] & 0xfffffffe) >>> 1);
+						sh4cpu.registers[n] = ((sh4cpu.registers[n] & 0x00000001) << 31) |
+								   ((sh4cpu.registers[n] & 0xfffffffe) >>> 1);
 					}
 				
 				});
@@ -1049,12 +1050,12 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int t = Emu.sh4cpu.registers[n] & 0x1;
+						int t = sh4cpu.registers[n] & 0x1;
 
-						Emu.sh4cpu.registers[n] = ((Emu.sh4cpu.SR & Sh4Context.flagT) << 31) |
-								   ((Emu.sh4cpu.registers[n] & 0xfffffffe) >>> 1);
+						sh4cpu.registers[n] = ((sh4cpu.SR & Sh4Context.flagT) << 31) |
+								   ((sh4cpu.registers[n] & 0xfffffffe) >>> 1);
 
-						Emu.sh4cpu.SR |= t;
+						sh4cpu.SR |= t;
 					}
 				
 				});
@@ -1064,10 +1065,10 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR |= (Emu.sh4cpu.registers[n] >>> 31) & 1;
+						sh4cpu.SR |= (sh4cpu.registers[n] >>> 31) & 1;
 
-						Emu.sh4cpu.registers[n] = ((Emu.sh4cpu.registers[n] & 0x7fffffff) << 1) |
-								   ((Emu.sh4cpu.registers[n] & 0x80000000) >>> 31);
+						sh4cpu.registers[n] = ((sh4cpu.registers[n] & 0x7fffffff) << 1) |
+								   ((sh4cpu.registers[n] & 0x80000000) >>> 31);
 					}
 				
 				});
@@ -1077,12 +1078,12 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int t = (Emu.sh4cpu.registers[n] >>> 31) & 1;
+						int t = (sh4cpu.registers[n] >>> 31) & 1;
 
-						Emu.sh4cpu.registers[n] = ((Emu.sh4cpu.registers[n] & 0x7fffffff) << 1) |
-								   ((Emu.sh4cpu.SR & Sh4Context.flagT) << 0);
+						sh4cpu.registers[n] = ((sh4cpu.registers[n] & 0x7fffffff) << 1) |
+								   ((sh4cpu.SR & Sh4Context.flagT) << 0);
 
-						Emu.sh4cpu.SR |= t;
+						sh4cpu.SR |= t;
 					}
 				
 				});
@@ -1092,17 +1093,17 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if((Emu.sh4cpu.registers[m] & 0x80000000) == 0)
+						if((sh4cpu.registers[m] & 0x80000000) == 0)
 						{
-							Emu.sh4cpu.registers[n] <<= (Emu.sh4cpu.registers[m] & 0x1f);
+							sh4cpu.registers[n] <<= (sh4cpu.registers[m] & 0x1f);
 						}
-						else if((Emu.sh4cpu.registers[m] & 0x1f) == 0)
+						else if((sh4cpu.registers[m] & 0x1f) == 0)
 						{
-							Emu.sh4cpu.registers[n] >>>= 31;
+							sh4cpu.registers[n] >>>= 31;
 						}
 						else
 						{
-							Emu.sh4cpu.registers[n] >>>= ((~Emu.sh4cpu.registers[m] & 0x1f) + 1);
+							sh4cpu.registers[n] >>>= ((~sh4cpu.registers[m] & 0x1f) + 1);
 						}
 					}
 				
@@ -1114,13 +1115,13 @@ public class CodeBlock {
 					@Override
 					public void call() {
 						int temp=0;
-						if ((Emu.sh4cpu.registers[n]&0x00000001)==0) Emu.sh4cpu.SR &= (~Sh4Context.flagT);
-						else Emu.sh4cpu.SR |=Sh4Context.flagT;
-						if ((Emu.sh4cpu.registers[n]&0x80000000)==0) temp=0;
+						if ((sh4cpu.registers[n]&0x00000001)==0) sh4cpu.SR &= (~Sh4Context.flagT);
+						else sh4cpu.SR |=Sh4Context.flagT;
+						if ((sh4cpu.registers[n]&0x80000000)==0) temp=0;
 						else temp=1;
-						Emu.sh4cpu.registers[n]>>=1;
-						if (temp==1) Emu.sh4cpu.registers[n]|=0x80000000;
-						else Emu.sh4cpu.registers[n]&=0x7FFFFFFF;
+						sh4cpu.registers[n]>>=1;
+						if (temp==1) sh4cpu.registers[n]|=0x80000000;
+						else sh4cpu.registers[n]&=0x7FFFFFFF;
 					}
 				
 				});
@@ -1130,17 +1131,17 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if((Emu.sh4cpu.registers[m] & 0x80000000) == 0)
+						if((sh4cpu.registers[m] & 0x80000000) == 0)
 						{
-							Emu.sh4cpu.registers[n] <<= (Emu.sh4cpu.registers[m] & 0x1f);
+							sh4cpu.registers[n] <<= (sh4cpu.registers[m] & 0x1f);
 						}
-						else if((Emu.sh4cpu.registers[m] & 0x1f) == 0)
+						else if((sh4cpu.registers[m] & 0x1f) == 0)
 						{
-							Emu.sh4cpu.registers[n] = 0;
+							sh4cpu.registers[n] = 0;
 						}
 						else
 						{
-							Emu.sh4cpu.registers[n] >>>= ((~Emu.sh4cpu.registers[m] & 0x1f) + 1);
+							sh4cpu.registers[n] >>>= ((~sh4cpu.registers[m] & 0x1f) + 1);
 						}
 
 					}
@@ -1153,8 +1154,8 @@ public class CodeBlock {
 					@Override
 					public void call() {
 
-						Emu.sh4cpu.SR |= (Emu.sh4cpu.registers[n] >>> 31) & 1;
-						Emu.sh4cpu.registers[n] <<= 1;
+						sh4cpu.SR |= (sh4cpu.registers[n] >>> 31) & 1;
+						sh4cpu.registers[n] <<= 1;
 					}
 				
 				});
@@ -1164,8 +1165,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR = (Emu.sh4cpu.SR & ~Sh4Context.flagT) | ((Emu.sh4cpu.registers[n] >>> 31) & 1);
-						Emu.sh4cpu.registers[n] <<= 1;
+						sh4cpu.SR = (sh4cpu.SR & ~Sh4Context.flagT) | ((sh4cpu.registers[n] >>> 31) & 1);
+						sh4cpu.registers[n] <<= 1;
 					}
 				
 				});
@@ -1175,9 +1176,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR = (Emu.sh4cpu.SR & ~Sh4Context.flagT) | (Emu.sh4cpu.registers[n] & 1);
-						Emu.sh4cpu.registers[n] >>>= 1;
-						Emu.sh4cpu.registers[n]&=0x7FFFFFFF;
+						sh4cpu.SR = (sh4cpu.SR & ~Sh4Context.flagT) | (sh4cpu.registers[n] & 1);
+						sh4cpu.registers[n] >>>= 1;
+						sh4cpu.registers[n]&=0x7FFFFFFF;
 					}
 				
 				});
@@ -1187,7 +1188,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] <<= 2;
+						sh4cpu.registers[n] <<= 2;
 					}
 				
 				});
@@ -1197,8 +1198,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n]>>>=2;
-						Emu.sh4cpu.registers[n]&=0x3FFFFFFF;
+						sh4cpu.registers[n]>>>=2;
+						sh4cpu.registers[n]&=0x3FFFFFFF;
 					}
 				
 				});
@@ -1208,7 +1209,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] <<= 8;
+						sh4cpu.registers[n] <<= 8;
 					}
 				
 				});
@@ -1218,7 +1219,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] >>>= 8;
+						sh4cpu.registers[n] >>>= 8;
 					}
 				
 				});
@@ -1228,7 +1229,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] <<= 16;
+						sh4cpu.registers[n] <<= 16;
 					}
 				
 				});
@@ -1238,9 +1239,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] >>>= 16;
+						sh4cpu.registers[n] >>>= 16;
 						
-						Emu.sh4cpu.registers[n]&=0x0000FFFF;
+						sh4cpu.registers[n]&=0x0000FFFF;
 					}
 				
 				});
@@ -1250,7 +1251,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1260,7 +1261,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1270,7 +1271,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1280,7 +1281,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1290,7 +1291,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1300,8 +1301,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PR = Emu.sh4cpu.PC + 4;
-						Emu.sh4cpu.PC = n;
+						sh4cpu.PR = sh4cpu.PC + 4;
+						sh4cpu.PC = n;
 					}
 				
 				});
@@ -1311,7 +1312,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC =  Emu.sh4cpu.PC  + Emu.sh4cpu.registers[n] + 4;;
+						sh4cpu.PC =  sh4cpu.PC  + sh4cpu.registers[n] + 4;;
 					}
 				
 				});
@@ -1321,8 +1322,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PR = Emu.sh4cpu.PC + 4;
-						Emu.sh4cpu.PC =  Emu.sh4cpu.PC  + Emu.sh4cpu.registers[n] + 4;;
+						sh4cpu.PR = sh4cpu.PC + 4;
+						sh4cpu.PC =  sh4cpu.PC  + sh4cpu.registers[n] + 4;;
 					}
 				
 				});
@@ -1332,7 +1333,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = Emu.sh4cpu.registers[n];
+						sh4cpu.PC = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1342,8 +1343,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PR = Emu.sh4cpu.PC + 4;
-						Emu.sh4cpu.PC = Emu.sh4cpu.registers[n];
+						sh4cpu.PR = sh4cpu.PC + 4;
+						sh4cpu.PC = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1353,7 +1354,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PC = Emu.sh4cpu.PR;
+						sh4cpu.PC = sh4cpu.PR;
 					}
 				
 				});
@@ -1363,14 +1364,14 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int rb = (Emu.sh4cpu.SR & Sh4Context.flagsRB);
-						Emu.sh4cpu.SR =Emu.sh4cpu.SSR & 0x700083f3;
+						int rb = (sh4cpu.SR & Sh4Context.flagsRB);
+						sh4cpu.SR =sh4cpu.SSR & 0x700083f3;
 
-						if((Emu.sh4cpu.SR & Sh4Context.flagsRB) != rb)
+						if((sh4cpu.SR & Sh4Context.flagsRB) != rb)
 						{
-							Emu.sh4cpu.switch_gpr_banks();
+							sh4cpu.switch_gpr_banks();
 						}
-						Emu.sh4cpu.PC = Emu.sh4cpu.SPC;
+						sh4cpu.PC = sh4cpu.SPC;
 					}
 				
 				});
@@ -1380,7 +1381,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = Emu.sh4cpu.MACH = 0;
+						sh4cpu.MACL = sh4cpu.MACH = 0;
 					}
 				
 				});
@@ -1390,7 +1391,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR &= (~Sh4Context.flagS);
+						sh4cpu.SR &= (~Sh4Context.flagS);
 					}
 				
 				});
@@ -1400,7 +1401,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR &= (~Sh4Context.flagT);
+						sh4cpu.SR &= (~Sh4Context.flagT);
 					}
 				
 				});
@@ -1410,13 +1411,13 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int rb = (Emu.sh4cpu.SR & Sh4Context.flagsRB);
+						int rb = (sh4cpu.SR & Sh4Context.flagsRB);
 
-						Emu.sh4cpu.SR = Emu.sh4cpu.registers[n] & 0x700083f3;
+						sh4cpu.SR = sh4cpu.registers[n] & 0x700083f3;
 
-						if(((Emu.sh4cpu.SR & Sh4Context.flagsRB) != rb) && ((Emu.sh4cpu.SR & Sh4Context.flagMD)!=0))
+						if(((sh4cpu.SR & Sh4Context.flagsRB) != rb) && ((sh4cpu.SR & Sh4Context.flagMD)!=0))
 						{
-							Emu.sh4cpu.switch_gpr_banks();
+							sh4cpu.switch_gpr_banks();
 						}
 					}
 				
@@ -1427,7 +1428,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.GBR = Emu.sh4cpu.registers[n];
+						sh4cpu.GBR = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1437,7 +1438,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.VBR = Emu.sh4cpu.registers[n];
+						sh4cpu.VBR = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1447,7 +1448,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SSR = Emu.sh4cpu.registers[m];
+						sh4cpu.SSR = sh4cpu.registers[m];
 					}
 				
 				});
@@ -1457,7 +1458,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SPC = Emu.sh4cpu.registers[m];
+						sh4cpu.SPC = sh4cpu.registers[m];
 					}
 				
 				});
@@ -1467,7 +1468,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.DBR = Emu.sh4cpu.registers[m];
+						sh4cpu.DBR = sh4cpu.registers[m];
 					}
 				
 				});
@@ -1477,7 +1478,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[m] = Emu.sh4cpu.registers[n];
+						sh4cpu.registers[m] = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1487,16 +1488,16 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int rb = (Emu.sh4cpu.SR & Sh4Context.flagsRB);
+						int rb = (sh4cpu.SR & Sh4Context.flagsRB);
 
-						Emu.sh4cpu.SR = Memory.read32(Emu.sh4cpu.registers[n]) & 0x700083f3;
+						sh4cpu.SR = Memory.read32(sh4cpu.registers[n]) & 0x700083f3;
 
-						if(((Emu.sh4cpu.SR & Sh4Context.flagsRB) != rb) && ((Emu.sh4cpu.SR & Sh4Context.flagMD)!=0))
+						if(((sh4cpu.SR & Sh4Context.flagsRB) != rb) && ((sh4cpu.SR & Sh4Context.flagMD)!=0))
 						{
-							Emu.sh4cpu.switch_gpr_banks();
+							sh4cpu.switch_gpr_banks();
 						}
 
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1506,8 +1507,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.GBR = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.GBR = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1517,8 +1518,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.VBR = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.VBR = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1528,8 +1529,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SSR = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.SSR = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1539,8 +1540,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SPC = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.SPC = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1550,8 +1551,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.DBR = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.DBR = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1561,8 +1562,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[m] = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.registers[m] = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1572,7 +1573,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACH = Emu.sh4cpu.registers[n];
+						sh4cpu.MACH = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1582,7 +1583,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = Emu.sh4cpu.registers[n];
+						sh4cpu.MACL = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1592,7 +1593,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PR = Emu.sh4cpu.registers[n];
+						sh4cpu.PR = sh4cpu.registers[n];
 					}
 				
 				});
@@ -1602,8 +1603,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACH = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.MACH = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1613,8 +1614,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.MACL = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.MACL = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1624,8 +1625,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.PR = Memory.read32(Emu.sh4cpu.registers[n]);
-						Emu.sh4cpu.registers[n] += 4;
+						sh4cpu.PR = Memory.read32(sh4cpu.registers[n]);
+						sh4cpu.registers[n] += 4;
 					}
 				
 				});
@@ -1689,11 +1690,11 @@ public class CodeBlock {
 						int QACR1 = Memory.regmapReadhandle32(MMREG.QACR1);
 						int addr;
 						IntBuffer src;
-						if (Emu.sh4cpu.registers[n] >= 0xe0000000 && Emu.sh4cpu.registers[n] <= 0xeffffffc)
+						if (sh4cpu.registers[n] >= 0xe0000000 && sh4cpu.registers[n] <= 0xeffffffc)
 						{
-						    addr = (Emu.sh4cpu.registers[n] & 0x03FFFFC0) | ((( (((Emu.sh4cpu.registers[n] & 0x20)!=0) ? QACR1 : QACR0)  >> 2) & 0x07) << 26);
+						    addr = (sh4cpu.registers[n] & 0x03FFFFC0) | ((( (((sh4cpu.registers[n] & 0x20)!=0) ? QACR1 : QACR0)  >> 2) & 0x07) << 26);
 
-						    if ((Emu.sh4cpu.registers[n] & 0x20)!=0)
+						    if ((sh4cpu.registers[n] & 0x20)!=0)
 						    {
 						    	src = Memory.SQ0;
 						    	addr |= 0x20;
@@ -1708,7 +1709,7 @@ public class CodeBlock {
 							}
 							else
 							{
-								Memory.sqWriteToMemory(addr,(Emu.sh4cpu.registers[n] & 0x20));
+								Memory.sqWriteToMemory(addr,(sh4cpu.registers[n] & 0x20));
 							}
 						}
 					}
@@ -1720,7 +1721,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR |= Sh4Context.flagS;
+						sh4cpu.SR |= Sh4Context.flagS;
 					}
 				
 				});
@@ -1730,7 +1731,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SR |= Sh4Context.flagT;
+						sh4cpu.SR |= Sh4Context.flagT;
 					}
 				
 				});
@@ -1750,7 +1751,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.SR;
+						sh4cpu.registers[n] = sh4cpu.SR;
 					}
 				
 				});
@@ -1760,7 +1761,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.GBR;
+						sh4cpu.registers[n] = sh4cpu.GBR;
 					}
 				
 				});
@@ -1770,7 +1771,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.VBR;
+						sh4cpu.registers[n] = sh4cpu.VBR;
 					}
 				
 				});
@@ -1780,7 +1781,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.SSR;
+						sh4cpu.registers[n] = sh4cpu.SSR;
 					}
 				
 				});
@@ -1790,7 +1791,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.SPC;
+						sh4cpu.registers[n] = sh4cpu.SPC;
 					}
 				
 				});
@@ -1800,7 +1801,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.SGR;
+						sh4cpu.registers[n] = sh4cpu.SGR;
 					}
 				
 				});
@@ -1810,7 +1811,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.DBR;
+						sh4cpu.registers[n] = sh4cpu.DBR;
 					}
 				
 				});
@@ -1820,7 +1821,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.registers[m];
+						sh4cpu.registers[n] = sh4cpu.registers[m];
 					}
 				
 				});
@@ -1830,8 +1831,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.SR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.SR);
 					}
 				
 				});
@@ -1841,8 +1842,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.GBR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.GBR);
 					}
 				
 				});
@@ -1852,8 +1853,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.VBR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.VBR);
 					}
 				
 				});
@@ -1863,8 +1864,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.SSR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.SSR);
 					}
 				
 				});
@@ -1874,8 +1875,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.SPC);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.SPC);
 					}
 				
 				});
@@ -1885,8 +1886,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.SGR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.SGR);
 					}
 				
 				});
@@ -1896,8 +1897,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.DBR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.DBR);
 					}
 				
 				});
@@ -1907,8 +1908,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.registers[m]);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.registers[m]);
 					}
 				
 				});
@@ -1918,7 +1919,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.MACH;
+						sh4cpu.registers[n] = sh4cpu.MACH;
 					}
 				
 				});
@@ -1928,7 +1929,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.MACL;
+						sh4cpu.registers[n] = sh4cpu.MACL;
 					}
 				
 				});
@@ -1938,7 +1939,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.PR;
+						sh4cpu.registers[n] = sh4cpu.PR;
 					}
 				
 				});
@@ -1948,8 +1949,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.MACH);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.MACH);
 
 					}
 				
@@ -1960,8 +1961,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.MACL);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.MACL);
 					}
 				
 				});
@@ -1971,8 +1972,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.PR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.PR);
 					}
 				
 				});
@@ -1982,14 +1983,14 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.SSR=Emu.sh4cpu.SR;
-						Emu.sh4cpu.SPC=Emu.sh4cpu.PC+2;
-						Emu.sh4cpu.SGR=Emu.sh4cpu.registers[15];
-						Emu.sh4cpu.SR |= Emu.sh4cpu.flagMD;
-						Emu.sh4cpu.SR |= Emu.sh4cpu.flagBL;
-						Emu.sh4cpu.SR |= Emu.sh4cpu.flagsRB;
+						sh4cpu.SSR=sh4cpu.SR;
+						sh4cpu.SPC=sh4cpu.PC+2;
+						sh4cpu.SGR=sh4cpu.registers[15];
+						sh4cpu.SR |= sh4cpu.flagMD;
+						sh4cpu.SR |= sh4cpu.flagBL;
+						sh4cpu.SR |= sh4cpu.flagsRB;
 						//EXPEVT=0x00000160;
-						Emu.sh4cpu.PC=Emu.sh4cpu.VBR+0x00000100;
+						sh4cpu.PC=sh4cpu.VBR+0x00000100;
 					}
 				
 				});
@@ -2000,13 +2001,13 @@ public class CodeBlock {
 					@Override
 					public void call() {
 
-						int fr = (Emu.sh4cpu.FPSCR & Sh4Context.flagFR);
+						int fr = (sh4cpu.FPSCR & Sh4Context.flagFR);
 
-						Emu.sh4cpu.FPSCR = Emu.sh4cpu.registers[n] & 0x003fffff;
+						sh4cpu.FPSCR = sh4cpu.registers[n] & 0x003fffff;
 
-						if((Emu.sh4cpu.FPSCR & Sh4Context.flagFR) != fr)
+						if((sh4cpu.FPSCR & Sh4Context.flagFR) != fr)
 						{
-							Emu.sh4cpu.swith_fp_banks();
+							sh4cpu.swith_fp_banks();
 					 	}
 					}
 				
@@ -2017,7 +2018,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FPUL = Emu.sh4cpu.registers[n];
+						sh4cpu.FPUL = sh4cpu.registers[n];
 					}
 				
 				});
@@ -2027,14 +2028,14 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						int fr = (Emu.sh4cpu.FPSCR & Sh4Context.flagFR);
+						int fr = (sh4cpu.FPSCR & Sh4Context.flagFR);
 
-						Emu.sh4cpu.FPSCR = Memory.read32(Emu.sh4cpu.registers[n]) & 0x003fffff;
-						Emu.sh4cpu.registers[m] += 4;
+						sh4cpu.FPSCR = Memory.read32(sh4cpu.registers[n]) & 0x003fffff;
+						sh4cpu.registers[m] += 4;
 
-						if((Emu.sh4cpu.FPSCR & Sh4Context.flagFR) != fr)
+						if((sh4cpu.FPSCR & Sh4Context.flagFR) != fr)
 						{
-							Emu.sh4cpu.swith_fp_banks();
+							sh4cpu.swith_fp_banks();
 					 	}
 					}
 				
@@ -2045,8 +2046,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FPUL = Memory.read32(Emu.sh4cpu.registers[m]);
-						Emu.sh4cpu.registers[m] += 4;
+						sh4cpu.FPUL = Memory.read32(sh4cpu.registers[m]);
+						sh4cpu.registers[m] += 4;
 					}
 				
 				});
@@ -2056,7 +2057,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.FPSCR;
+						sh4cpu.registers[n] = sh4cpu.FPSCR;
 					}
 				
 				});
@@ -2066,7 +2067,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] = Emu.sh4cpu.FPUL;
+						sh4cpu.registers[n] = sh4cpu.FPUL;
 					}
 				
 				});
@@ -2076,8 +2077,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.FPSCR);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.FPSCR);
 					}
 				
 				});
@@ -2087,8 +2088,8 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.registers[n] -= 4;
-						Memory.write32(Emu.sh4cpu.registers[n], Emu.sh4cpu.FPUL);
+						sh4cpu.registers[n] -= 4;
+						Memory.write32(sh4cpu.registers[n], sh4cpu.FPUL);
 					}
 				
 				});
@@ -2099,7 +2100,7 @@ public class CodeBlock {
 					@Override
 					public void call() {
 
-						Emu.sh4cpu.FRm[n] = 0x00000000;
+						sh4cpu.FRm[n] = 0x00000000;
 					}
 				
 				});
@@ -2109,7 +2110,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FRm[n] = 0x3f800000;
+						sh4cpu.FRm[n] = 0x3f800000;
 					}
 				
 				});
@@ -2189,7 +2190,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FPUL = (int) Emu.sh4cpu.FRm[m];
+						sh4cpu.FPUL = (int) sh4cpu.FRm[m];
 					}
 				
 				});
@@ -2199,7 +2200,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FRm[n] =Float.intBitsToFloat(Emu.sh4cpu.FPUL);
+						sh4cpu.FRm[n] =Float.intBitsToFloat(sh4cpu.FPUL);
 					}
 				
 				});
@@ -2229,12 +2230,12 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if ((Emu.sh4cpu.FPSCR & Sh4Context.flagPR)!=0)
+						if ((sh4cpu.FPSCR & Sh4Context.flagPR)!=0)
 						{
 							
-							double v = Emu.sh4cpu.getDR(n);
+							double v = sh4cpu.getDR(n);
 							
-							Emu.sh4cpu.FPUL =(int) Double.doubleToLongBits(v);
+							sh4cpu.FPUL =(int) Double.doubleToLongBits(v);
 						}
 					}
 				
@@ -2245,9 +2246,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						if ((Emu.sh4cpu.FPSCR & Sh4Context.flagPR)!=0)
+						if ((sh4cpu.FPSCR & Sh4Context.flagPR)!=0)
 						{										
-							Emu.sh4cpu.setDR(n, Double.longBitsToDouble((long)Emu.sh4cpu.FPUL));
+							sh4cpu.setDR(n, Double.longBitsToDouble((long)sh4cpu.FPUL));
 						}
 					}
 				
@@ -2398,9 +2399,9 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FPSCR ^= Sh4Context.flagFR;
+						sh4cpu.FPSCR ^= Sh4Context.flagFR;
 
-						Emu.sh4cpu.swith_fp_banks();
+						sh4cpu.swith_fp_banks();
 					}
 				
 				});
@@ -2410,7 +2411,7 @@ public class CodeBlock {
 
 					@Override
 					public void call() {
-						Emu.sh4cpu.FPSCR ^= Sh4Context.flagSZ;
+						sh4cpu.FPSCR ^= Sh4Context.flagSZ;
 					}
 				
 				});

@@ -37,7 +37,7 @@ public class Launcher {
         Logger.enabled = false;
 
         long secondsElapsed = 0;
-        Emu emu = new Emu();
+        Emu emu = new Emu(Memory.INSTANCE);
         long cycleCnt = 0;
         long frameCnt = 0;
         while(true) {
