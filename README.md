@@ -1,8 +1,10 @@
-This is a github mirror for the esoteric_emu sourcecode, a java based Sega Dreamcast emulator
+------------------------------------------------------------------------------
+This is a github mirror for the esoteric_emu sourcecode (with some minor modifications),
+a java based Sega Dreamcast emulator.
+
 I've created this repository as a reference, I'm not intending to mantain/develop it.
 
-Federico Berti
-2021
+------------------------------------------------------------------------------
 
 Introduction
 Hello. My name is Rui Caridade and i'm a student at the University of Evora in Portugal. This project aims to study the implementation of a Sh4 (1) software simulator in the Java programming language and is the basis for my master thesis. The final goal will be to use that simulator in a dreamcast emulator, capable of running complex software like NetBSD or Linux at acceptable speeds.
